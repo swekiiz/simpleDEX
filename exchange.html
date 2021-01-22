@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="./style.css" />
+    <title>Exchange</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="web3.min.js"></script>
+    <script type="text/javascript">
+      var contractAddress = "0x6711b9326a5f95aF2D84b8E77f9Bd9AFe210b717";
+      var abi = [
+        {
+          constant: false,
+          inputs: [
+            {
+              internalType: "uint256",
+              name: "amount",
+              type: "uint256",
+            },
+          ],
+          name: "AtoB",
+          outputs: [],
+          payable: false,
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
+          constant: false,
+          inputs: [
+            {
+              internalType: "uint256",
+              name: "amount",
+              type: "uint256",
+            },
+          ],
+          name: "BtoA",
+          outputs: [],
+          payable: false,
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "contract BestCoinInterface",
+              name: "_a",
+              type: "address",
+            },
+            {
+              internalType: "contract BestCoinInterface",
+              name: "_b",
+              type: "address",
+            },
+          ],
+          payable: false,
+          stateMutability: "nonpayable",
+          type: "constructor",
+        },
+        {
+          constant: true,
+          inputs: [],
+          name: "getAcoinBalanceOfthis",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          payable: false,
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          constant: true,
+          inputs: [],
+          name: "getBcoinBalanceOfthis",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          payable: false,
+          stateMutability: "view",
+          type: "function",
+        },
+      ];
+      var AcoinContractAddress = "0x62727b7bA5CD9823328C440FA93Aacc58866d2Aa";
+      var BcoinContractAddress = "0x351649484058f2EA6c5A7F6cd89F261c718429c7";
+
+      var ERC20ABI = [
+        {
+          inputs: [
+            {
+              internalType: "string",
+              name: "_name",
+              type: "string",
+            },
+            {
+              internalType: "string",
+              name: "_symbol",
+              type: "string",
+            },
+            {
+              internalType: "uint256",
+              name: "_decimals",
+              type: "uint256",
+            },
+          ],
+          payable: false,
+          stateMutability: "nonpayable",
+          type: "constructor",
+        },
+        {
+          anonymous: false,
+          inputs: [
+            {
+              indexed: true,
+              internalType: "address",
+              name: "owner",
+              type: "address",
+            },
+            {
+              indexed: true,
+              internalType: "address",
+              name: "spender",
+              type: "address",
+            },
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "value",
+              type: "uint256",
+            },
+          ],
+          name: "Approval",
+          type: "event",
+        },
+        {
+          anonymous: false,
+          inputs: [
+            {
+              indexed: true,
+              internalType: "address",
+              name: "to",
+              type: "address",
+            },
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "value",
+              type: "uint256",
+            },
+          ],
+          name: "Mint",
+          type: "event",
+        },
+        {
+          anonymous: false,
+          inputs: [],
+          name: "MintFinished",
+          type: "event",
+        },
+        {
+          anonymous: false,
+          inputs: [],
+          name: "Pause",
+          type: "event",
+        },
+        {
+          anonymous: false,
+          inputs: [
+            {
+              indexed: true,
+              internalType: "address",
+              name: "from",
+              type: "address",
+            },
+            {
+              indexed: true,
+              internalType: "address",
+              name: "to",
+              type: "address",
+            },
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "value",
+              type: "uint256",
+            },
+          ],
+          name: "Transfer",
+          type: "event",
+        },
+        {
+          anonymous: false,
+          inputs: [],
+          name: "Unpause",
+          type: "event",
+        },
+        {
+          constant: true,
+          inputs: [
+            {
+              internalType: "address",
+              name: "_owner",
+              type: "address",
+            },
+            {
+              internalType: "address",
+              name: "_spender",
+              type: "address",
+            },
+          ],
+          name: "allowance",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "remaining",
+              type: "uint256",
+            },
+          ],
+          payable: false,
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          constant: false,
+          inputs: [
+            {
+              internalType: "address",
+              name: "_spender",
+              type: "address",
+            },
+            {
+              internalType: "uint256",
+              name: "_value",
+              type: "uint256",
+            },
+          ],
+          name: "approve",
+          outputs: [],
+          payable: false,
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
+          constant: true,
+          inputs: [
+            {
+              internalType: "address",
+              name: "_owner",
+              type: "address",
+            },
+          ],
+          name: "balanceOf",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "balance",
+              type: "uint256",
+            },
+          ],
+          payable: false,
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          constant: true,
+          inputs: [],
+          name: "decimals",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          payable: false,
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          constant: false,
+          inputs: [],
+          name: "finishMinting",
+          outputs: [
+            {
+              internalType: "bool",
+              name: "",
+              type: "bool",
+            },
+          ],
+          payable: false,
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
+          constant: false,
+          inputs: [
+            {
+              internalType: "address",
+              name: "_to",
+              type: "address",
+            },
+            {
+              internalType: "uint256",
+              name: "_amount",
+              type: "uint256",
+            },
+          ],
+          name: "mint",
+          outputs: [
+            {
+              internalType: "bool",
+              name: "",
+              type: "bool",
+            },
+          ],
+          payable: false,
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
+          constant: true,
+          inputs: [],
+          name: "mintingFinished",
+          outputs: [
+            {
+              internalType: "bool",
+              name: "",
+              type: "bool",
+            },
+          ],
+          payable: false,
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          constant: true,
+          inputs: [],
+          name: "name",
+          outputs: [
+            {
+              internalType: "string",
+              name: "",
+              type: "string",
+            },
+          ],
+          payable: false,
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          constant: true,
+          inputs: [],
+          name: "owner",
+          outputs: [
+            {
+              internalType: "address",
+              name: "",
+              type: "address",
+            },
+          ],
+          payable: false,
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          constant: false,
+          inputs: [],
+          name: "pause",
+          outputs: [
+            {
+              internalType: "bool",
+              name: "",
+              type: "bool",
+            },
+          ],
+          payable: false,
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
+          constant: true,
+          inputs: [],
+          name: "paused",
+          outputs: [
+            {
+              internalType: "bool",
+              name: "",
+              type: "bool",
+            },
+          ],
+          payable: false,
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          constant: true,
+          inputs: [],
+          name: "symbol",
+          outputs: [
+            {
+              internalType: "string",
+              name: "",
+              type: "string",
+            },
+          ],
+          payable: false,
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          constant: true,
+          inputs: [],
+          name: "totalSupply",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          payable: false,
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          constant: false,
+          inputs: [
+            {
+              internalType: "address",
+              name: "_to",
+              type: "address",
+            },
+            {
+              internalType: "uint256",
+              name: "_value",
+              type: "uint256",
+            },
+          ],
+          name: "transfer",
+          outputs: [],
+          payable: false,
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
+          constant: false,
+          inputs: [
+            {
+              internalType: "address",
+              name: "_from",
+              type: "address",
+            },
+            {
+              internalType: "address",
+              name: "_to",
+              type: "address",
+            },
+            {
+              internalType: "uint256",
+              name: "_value",
+              type: "uint256",
+            },
+          ],
+          name: "transferFrom",
+          outputs: [],
+          payable: false,
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
+          constant: false,
+          inputs: [
+            {
+              internalType: "address",
+              name: "newOwner",
+              type: "address",
+            },
+          ],
+          name: "transferOwnership",
+          outputs: [],
+          payable: false,
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
+          constant: false,
+          inputs: [],
+          name: "unpause",
+          outputs: [
+            {
+              internalType: "bool",
+              name: "",
+              type: "bool",
+            },
+          ],
+          payable: false,
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+      ];
+      var userAccount = "";
+      window.addEventListener("load", function () {
+        if (window.ethereum) {
+          web3 = new Web3(ethereum);
+          try {
+            ethereum.enable().then((result) => {
+              startApp();
+            });
+          } catch (err) {
+            console.log(err);
+          }
+        } else if (typeof web3 !== "undefined") {
+          web3 = new Web3(web3.currentProvider);
+          startApp();
+        } else {
+          console.log("No web3? You should consider trying MetaMask!");
+          web3 = new Web3(
+            new Web3.providers.HttpProvider(
+              "https://kovan.infura.io/v3/YOUR_INFURA_KEY"
+            )
+          );
+          //web3 = new Web3( new Web3.providers.HttpProvider( "http://localhost:8545/" ));
+          // web3 = new Web3( new Web3.providers.HttpProvider( "https://rpc.tch.in.th" ));
+          startApp();
+        }
+      });
+      function startApp() {
+        web3.eth.net.getId().then((netId) => {
+          console.log("netId: " + netId);
+          $("#contractAddress").text("Contract Address : " + contractAddress);
+
+          web3.eth.getAccounts().then((accounts) => {
+            userAccount = accounts[0];
+            $("#eth_address").text("User Address : " + userAccount);
+          });
+        });
+      }
+
+      function getContract() {
+        let contract = new web3.eth.Contract(abi, contractAddress);
+        return contract;
+      }
+
+      function getAcoinContract() {
+        let contract = new web3.eth.Contract(ERC20ABI, AcoinContractAddress);
+        return contract;
+      }
+
+      function getBcoinContract() {
+        let contract = new web3.eth.Contract(ERC20ABI, BcoinContractAddress);
+        return contract;
+      }
+      function approve(options, contract, callback) {
+        contract.methods
+          .allowance(userAccount, contractAddress)
+          .call()
+          .then((result) => {
+            if (result == 0) {
+              contract.methods
+                .approve(contractAddress, 1000000000)
+                .send(options)
+                .on("error", (error) => {
+                  console.log(" - approve - ");
+                  console.error(error);
+                })
+                .on("transactionHash", (transactionHash) => {
+                  let link;
+                  link = "https://kovan.etherscan.io/tx/" + transactionHash;
+                  console.log(" - approve - ");
+                  console.log(transactionHash);
+                  console.log(link);
+                })
+                .on("confirmation", (confirmationNumber, receipt) => {
+                  console.log(" - approve - ");
+                  console.log("confirmationNumber", confirmationNumber);
+                  console.log(receipt);
+                })
+                .on('receipt', (receipt) => {
+                  callback();
+                });
+            } else {
+              callback();
+            }
+          });
+      }
+      function AtoB() {
+        let amount = $("#f1").val();
+        let contract = getContract();
+        let AcoinContract = getAcoinContract();
+        let options = {
+          from: userAccount,
+        };
+        approve(options, AcoinContract, () => {
+          contract.methods
+            .AtoB(~~amount * 10 ** 6)
+            .send(options)
+            .on("error", (error) => {
+              console.error(error);
+            })
+            .on("transactionHash", (transactionHash) => {
+              let link;
+              link = "https://kovan.etherscan.io/tx/" + transactionHash;
+              console.log(transactionHash);
+              console.log(link);
+            })
+            .on("confirmation", (confirmationNumber, receipt) => {
+              console.log("confirmationNumber", confirmationNumber);
+              console.log(receipt);
+            });
+        });
+      }
+
+      function BtoA() {
+        let amount = $("#f2").val();
+        let contract = getContract();
+        let BcoinContract = getBcoinContract();
+        let options = {
+          from: userAccount,
+        };
+        approve(options, BcoinContract, () => {
+          contract.methods
+            .BtoA(~~amount * 10 ** 6)
+            .send(options)
+            .on("error", (error) => {
+              console.error(error);
+            })
+            .on("transactionHash", (transactionHash) => {
+              let link;
+              link = "https://kovan.etherscan.io/tx/" + transactionHash;
+              console.log(transactionHash);
+              console.log(link);
+            })
+            .on("confirmation", (confirmationNumber, receipt) => {
+              console.log("confirmationNumber", confirmationNumber);
+              console.log(receipt);
+            });
+        });
+      }
+    </script>
+  </head>
+  <body>
+    <header class="header">
+      <h1>Exchange app</h1>
+    </header>
+    <div class="contractAddressWrapper">
+      <h1 id="contractAddress"></h1>
+      <h1 id="eth_address"></h1>
+    </div>
+    <section class="section">
+      <div class="item">
+        <h1 class="e">Acoin to Bcoin</h1>
+        <input type="text" class="input" id="f1" placeholder="Acoin" />
+        <button class="button" onClick="javascript:AtoB();">Enter</button>
+      </div>
+      <div class="item">
+        <h1 class="e">Bcoin to Acoin</h1>
+        <input type="text" class="input" id="f2" placeholder="Bcoin" />
+        <button class="button" onClick="javascript:BtoA();">Enter</button>
+      </div>
+    </section>
+  </body>
+</html>
